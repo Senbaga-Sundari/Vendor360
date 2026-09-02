@@ -1,158 +1,116 @@
 import { useEffect, useState } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
+
 import './App.css'
 
 function App() {
-  // ============================================
-  // STATE VARIABLES
-  // ============================================
-
   const [vendors, setVendors] = useState([])
-
   const [dashboard, setDashboard] = useState(null)
-
   const [error, setError] = useState(null)
 
-
-  // ============================================
-  // FETCH DATA FROM BACKEND
-  // ============================================
-
   useEffect(() => {
-
-    async function fetchData() {
-
-      try {
-
-        setError(null)
-
-
-        // ============================================
-        // FETCH ALL VENDORS
-        // API: /api/vendors
-        // ============================================
-
-        const vendorResponse = await fetch(
-          'http://localhost:8080/api/vendors'
-        )
-
-
-        if (!vendorResponse.ok) {
-
-          throw new Error(
-            'Failed to fetch vendor data'
-          )
-
+    fetch('http://localhost:8080/api/vendors')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch vendors')
         }
 
+        return response.json()
+      })
+      .then((data) => {
+        setVendors(data)
+      })
+      .catch((error) => {
+        setError(error.message)
+      })
 
-        const vendorData = await vendorResponse.json()
-
-        setVendors(vendorData)
-
-
-        // ============================================
-        // FETCH DASHBOARD SUMMARY
-        // API: /api/vendors/dashboard
-        // ============================================
-
-        const dashboardResponse = await fetch(
-          'http://localhost:8080/api/vendors/dashboard'
-        )
-
-
-        if (!dashboardResponse.ok) {
-
-          throw new Error(
-            'Failed to fetch dashboard data'
-          )
-
+    fetch('http://localhost:8080/api/vendors/dashboard')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard')
         }
 
-
-        const dashboardData =
-          await dashboardResponse.json()
-
-        setDashboard(dashboardData)
-
-
-      } catch (err) {
-
-        console.error(err)
-
-        setError(err.message)
-
-      }
-
-    }
-
-
-    fetchData()
-
+        return response.json()
+      })
+      .then((data) => {
+        setDashboard(data)
+      })
+      .catch((error) => {
+        setError(error.message)
+      })
   }, [])
 
+  // Show only first 10 vendors in chart
+  const chartData = vendors.slice(0, 10).map((vendor) => ({
+    vendor: vendor.vendorName,
+    quality: Number(vendor.qualityScore),
+    sla: Number(vendor.slaScore),
+    delivery: Number(vendor.deliveryScore),
+  }))
 
-  // ============================================
-  // PAGE UI
-  // ============================================
+  const categoryData = Object.values(
+  vendors.reduce((acc, vendor) => {
+
+    const category = vendor.category || 'Unknown'
+
+    if (!acc[category]) {
+      acc[category] = {
+        name: category,
+        value: 0,
+      }
+    }
+
+    acc[category].value += 1
+
+    return acc
+
+  }, {})
+)
+
+const COLORS = [
+  '#3b5998',
+  '#4caf50',
+  '#ff9800',
+  '#f44336',
+  '#9c27b0',
+  '#00acc1',
+  '#795548',
+]
 
   return (
-
-    <div className="app">
-
-
-      {/* ============================================
-          HEADER
-      ============================================ */}
-
+    <>
+      {/* HEADER */}
       <header className="header">
-
         <h1>Vendor360</h1>
-
-        <p>
-          Integrated Vendor Management Dashboard
-        </p>
-
+        <p>Integrated Vendor Management Dashboard</p>
       </header>
-
-
-
-      {/* ============================================
-          MAIN CONTENT
-      ============================================ */}
 
       <main className="main-content">
 
+     <section className="dashboard-section">
+        {/* DASHBOARD SUMMARY */}
+        <h2>Dashboard Overview</h2>
 
-        {/* ============================================
-            DASHBOARD OVERVIEW
-        ============================================ */}
+        {error && (
+          <p className="error">
+            Error: {error}
+          </p>
+        )}
 
-        <section className="dashboard-section">
-
-          <h2>Dashboard Overview</h2>
-
-
-          {/* ERROR MESSAGE */}
-
-          {error && (
-
-            <p className="error-message">
-
-              Error: {error}
-
-            </p>
-
-          )}
-
-
-          {/* ============================================
-              DASHBOARD SUMMARY CARDS
-          ============================================ */}
-
-          <div className="dashboard-cards">
-
-
-            {/* TOTAL VENDORS */}
+        <div className="cards">
+ {/* TOTAL VENDORS */}
 
             <div className="card card-blue">
 
@@ -290,173 +248,171 @@ function App() {
               </p>
 
             </div>
+            
+            </div>
+</section>
+
+        {/* PERFORMANCE CHART */}
+        <h2 className="section-title">
+          Vendor Performance Comparison
+        </h2>
+
+        <div className="chart-container">
+
+          <ResponsiveContainer width="100%" height={400}>
+
+            <BarChart data={chartData}>
+
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis
+                dataKey="vendor"
+              />
+
+              <YAxis
+                domain={[0, 100]}
+              />
+
+              <Tooltip />
+
+              <Legend />
+
+              <Bar
+                dataKey="quality"
+                name="Quality Score"
+              />
+
+              <Bar
+                dataKey="sla"
+                name="SLA Score"
+              />
+
+              <Bar
+                dataKey="delivery"
+                name="Delivery Score"
+              />
+
+            </BarChart>
+
+          </ResponsiveContainer>
+
+        </div>
 
 
-          </div>
+        {/* CATEGORY DISTRIBUTION */}
 
-        </section>
+<h2 className="section-title">
+  Vendor Category Distribution
+</h2>
+
+<div className="chart-container">
+
+  <ResponsiveContainer width="100%" height={400}>
+
+    <PieChart>
+
+      <Pie
+        data={categoryData}
+        cx="50%"
+        cy="50%"
+        labelLine={false}
+        label={({ name, value }) =>
+          `${name}: ${value}`
+        }
+        outerRadius={140}
+        fill="#8884d8"
+        dataKey="value"
+      >
+
+        {categoryData.map((entry, index) => (
+
+          <Cell
+            key={`cell-${index}`}
+            fill={COLORS[index % COLORS.length]}
+          />
+
+        ))}
+
+      </Pie>
+
+      <Tooltip />
+
+      <Legend />
+
+    </PieChart>
+
+  </ResponsiveContainer>
+
+</div>
 
 
+        {/* VENDOR TABLE */}
+        <h2 className="section-title">
+          Vendor Details
+        </h2>
 
-        {/* ============================================
-            VENDOR DETAILS
-        ============================================ */}
+        <div className="table-container">
 
-        <section className="vendor-section">
+          <table>
 
-          <h2>Vendor Details</h2>
+            <thead>
+              <tr>
+                <th>Vendor ID</th>
+                <th>Vendor Name</th>
+                <th>Category</th>
+                <th>Country</th>
+                <th>City</th>
+                <th>Contract Value</th>
+                <th>Quality Score</th>
+                <th>SLA Score</th>
+                <th>Delivery Score</th>
+                <th>Risk Event</th>
+              </tr>
+            </thead>
 
+            <tbody>
 
-          <div className="table-container">
+              {vendors.map((vendor) => (
 
+                <tr key={vendor.vendorId}>
 
-            <table>
+                  <td>{vendor.vendorId}</td>
 
+                  <td>{vendor.vendorName}</td>
 
-              {/* ============================================
-                  TABLE HEADER
-              ============================================ */}
+                  <td>{vendor.category}</td>
 
-              <thead>
+                  <td>{vendor.country}</td>
 
-                <tr>
+                  <td>{vendor.city}</td>
 
-                  <th>Vendor ID</th>
+                  <td>
+                    {vendor.currency}{' '}
+                    {vendor.contractValue}
+                  </td>
 
-                  <th>Vendor Name</th>
+                  <td>{vendor.qualityScore}</td>
 
-                  <th>Category</th>
+                  <td>{vendor.slaScore}</td>
 
-                  <th>Country</th>
+                  <td>{vendor.deliveryScore}</td>
 
-                  <th>City</th>
-
-                  <th>Contract Value</th>
-
-                  <th>Quality Score</th>
-
-                  <th>SLA Score</th>
-
-                  <th>Delivery Score</th>
-
-                  <th>Risk Event</th>
+                  <td>
+                    {vendor.riskEvent || 'No Risk'}
+                  </td>
 
                 </tr>
 
-              </thead>
+              ))}
 
+            </tbody>
 
+          </table>
 
-              {/* ============================================
-                  TABLE BODY
-              ============================================ */}
-
-              <tbody>
-
-
-                {vendors.map((vendor) => (
-
-                  <tr
-                    key={vendor.vendorId}
-                  >
-
-
-                    <td>
-
-                      {vendor.vendorId}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.vendorName}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.category}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.country}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.city}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.currency}{' '}
-
-                      {vendor.contractValue}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.qualityScore}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.slaScore}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.deliveryScore}
-
-                    </td>
-
-
-                    <td>
-
-                      {vendor.riskEvent
-                        ? vendor.riskEvent
-                        : 'No Risk'}
-
-                    </td>
-
-
-                  </tr>
-
-                ))}
-
-
-              </tbody>
-
-
-            </table>
-
-
-          </div>
-
-
-        </section>
-
+        </div>
 
       </main>
-
-
-    </div>
-
+    </>
   )
 }
 

@@ -147,3 +147,17 @@ tbody tr:hover {
 .card-purple {
   border-top: 5px solid #8e44ad;
 }
+
+.section-title {
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+.chart-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
