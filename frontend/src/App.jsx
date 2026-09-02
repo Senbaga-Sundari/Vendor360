@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import VendorAIAssessment from "./components/VendorAIAssessment";
 import {
   BarChart,
   Bar,
@@ -172,6 +173,64 @@ const paginatedVendors =
     endIndex
   )
 
+  const riskEventData = Object.entries(
+  vendors.reduce((acc, vendor) => {
+
+    const riskEvent =
+      vendor.riskEvent &&
+      vendor.riskEvent !== "None"
+        ? vendor.riskEvent
+        : "No Risk Event";
+
+    acc[riskEvent] = (acc[riskEvent] || 0) + 1;
+
+    return acc;
+
+  }, {})
+).map(([name, value]) => ({
+  name,
+  value,
+}));
+
+const highRiskVendors = vendors
+  .map((vendor) => {
+
+    let riskScore = 0;
+
+    // Invoice discrepancies
+    riskScore += (vendor.invoiceDiscrepancies || 0) * 2;
+
+    // Payment delays
+    riskScore += (vendor.paymentDelays || 0) * 3;
+
+    // Compliance issues
+    riskScore += (vendor.complianceIssues || 0) * 5;
+
+    // Critical dependency
+    if (vendor.criticalDependency === true) {
+      riskScore += 10;
+    }
+
+    // Risk event
+    if (
+      vendor.riskEvent &&
+      vendor.riskEvent !== "None"
+    ) {
+      riskScore += 5;
+    }
+
+    return {
+      ...vendor,
+      riskScore,
+    };
+  })
+
+  .sort((a, b) => b.riskScore - a.riskScore)
+
+  .slice(0, 10);
+
+
+
   return (
     <>
       {/* HEADER */}
@@ -335,6 +394,92 @@ const paginatedVendors =
             </div>
 </section>
 
+<div className="risk-table-card">
+
+  <h2>🚨 Top 10 High-Risk Vendors</h2>
+
+  <div className="table-container">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Vendor ID</th>
+          <th>Vendor Name</th>
+          <th>Risk Event</th>
+          <th>Invoice Issues</th>
+          <th>Payment Delays</th>
+          <th>Compliance Issues</th>
+          <th>Critical Dependency</th>
+          <th>Risk Score</th>
+          <th>AI Analysis</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        {highRiskVendors.map((vendor, index) => (
+
+          <tr key={vendor.vendorId}>
+
+            <td>{index + 1}</td>
+
+            <td>{vendor.vendorId}</td>
+
+            <td>{vendor.vendorName}</td>
+
+            <td>
+              {vendor.riskEvent &&
+              vendor.riskEvent !== "None"
+                ? vendor.riskEvent
+                : "No Risk Event"}
+            </td>
+
+            <td>
+              {vendor.invoiceDiscrepancies || 0}
+            </td>
+
+            <td>
+              {vendor.paymentDelays || 0}
+            </td>
+
+            <td>
+              {vendor.complianceIssues || 0}
+            </td>
+
+            <td>
+              {vendor.criticalDependency
+                ? "Yes"
+                : "No"}
+            </td>
+
+            <td>
+              <strong>
+                {vendor.riskScore}
+              </strong>
+            </td>
+
+            <td>
+
+  <VendorAIAssessment
+    vendorId={vendor.vendorId}
+  />
+
+</td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
         {/* PERFORMANCE CHART */}
         <h2 className="section-title">
           Vendor Performance Comparison
@@ -378,6 +523,41 @@ const paginatedVendors =
             </BarChart>
 
           </ResponsiveContainer>
+
+          <div className="chart-card">
+
+  <h2>Risk Event Distribution</h2>
+
+  <ResponsiveContainer width="100%" height={350}>
+
+    <PieChart>
+
+      <Pie
+        data={riskEventData}
+        dataKey="value"
+        nameKey="name"
+        cx="50%"
+        cy="50%"
+        outerRadius={120}
+        label
+      >
+        {riskEventData.map((entry, index) => (
+
+          <Cell key={`cell-${index}`} 
+          fill={COLORS[index % COLORS.length]}
+           />
+        ))}
+      </Pie>
+
+      <Tooltip />
+
+      <Legend />
+
+    </PieChart>
+
+  </ResponsiveContainer>
+
+</div>
 
         </div>
 

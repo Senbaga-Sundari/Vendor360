@@ -1,5 +1,6 @@
 C:\Projects\Vendor360\integration\camel\src\main\java\com\psiddhi\ivms\CamelIntegrationApplication.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\controller\Vendor360Controller.java
+C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\model\AiAssessment.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\model\DashboardSummary.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\model\Vendor360.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\repository\Vendor360Repository.java
@@ -7,5 +8,6 @@ C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\routes\Contr
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\routes\PerformanceRoute.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\routes\RiskRoute.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\routes\Vendor360Route.java
+C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\service\OllamaService.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\service\Vendor360Service.java
 C:\Projects\Vendor360\integration\camel\src\main\java\com\vendor360\Vendor360CamelApplication.java

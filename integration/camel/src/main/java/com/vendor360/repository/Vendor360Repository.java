@@ -28,85 +28,170 @@ public class Vendor360Repository {
             ORDER BY vendor_id
             """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapVendor(rs));
+    }
 
-            Vendor360 v = new Vendor360();
 
-            v.setVendorId(rs.getString("vendor_id"));
-            v.setVendorName(rs.getString("vendor_name"));
-            v.setCategory(rs.getString("category"));
-            v.setCountry(rs.getString("country"));
-            v.setCity(rs.getString("city"));
-            v.setContactEmail(rs.getString("contact_email"));
+    // ============================================
+    // GET VENDOR BY ID
+    // ============================================
 
-            v.setContractId(rs.getString("contract_id"));
-            v.setContractType(rs.getString("contract_type"));
-            v.setContractValue(rs.getBigDecimal("contract_value"));
-            v.setCurrency(rs.getString("currency"));
+    public Vendor360 findByVendorId(String vendorId) {
 
-            v.setPaymentTermsDays(
-                    rs.getObject("payment_terms_days", Integer.class));
+        String sql = """
+            SELECT *
+            FROM vw_vendor360
+            WHERE vendor_id = ?
+            """;
 
-            v.setRenewalNoticeDays(
-                    rs.getObject("renewal_notice_days", Integer.class));
+        List<Vendor360> vendors = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> mapVendor(rs),
+                vendorId
+        );
 
-            v.setContractStatus(rs.getString("contract_status"));
+        if (vendors.isEmpty()) {
+            return null;
+        }
 
-            v.setPerformanceId(rs.getString("performance_id"));
-            v.setPeriod(rs.getString("period"));
+        return vendors.get(0);
+    }
 
-            v.setOrders(
-                    rs.getObject("orders", Integer.class));
 
-            v.setOnTimeDeliveries(
-                    rs.getObject("on_time_deliveries", Integer.class));
+    // ============================================
+    // COMMON VENDOR MAPPER
+    // ============================================
 
-            v.setLateDeliveries(
-                    rs.getObject("late_deliveries", Integer.class));
+    private Vendor360 mapVendor(
+            java.sql.ResultSet rs)
+            throws java.sql.SQLException {
 
-            v.setQualityScore(
-                    rs.getBigDecimal("quality_score"));
+        Vendor360 v = new Vendor360();
 
-            v.setSlaScore(
-                    rs.getBigDecimal("sla_score"));
 
-            v.setDeliveryScore(
-                    rs.getBigDecimal("delivery_score"));
+        // ============================================
+        // SUPPLIER INFORMATION
+        // ============================================
 
-            v.setRiskId(rs.getString("risk_id"));
+        v.setVendorId(rs.getString("vendor_id"));
+        v.setVendorName(rs.getString("vendor_name"));
+        v.setCategory(rs.getString("category"));
+        v.setCountry(rs.getString("country"));
+        v.setCity(rs.getString("city"));
+        v.setContactEmail(rs.getString("contact_email"));
 
-            v.setInvoiceCount(
-                    rs.getObject("invoice_count", Integer.class));
 
-            v.setInvoiceDiscrepancies(
-                    rs.getObject(
-                            "invoice_discrepancies",
-                            Integer.class));
+        // ============================================
+        // CONTRACT INFORMATION
+        // ============================================
 
-            v.setPaymentDelays(
-                    rs.getObject(
-                            "payment_delays",
-                            Integer.class));
+        v.setContractId(rs.getString("contract_id"));
 
-            v.setComplianceIssues(
-                    rs.getObject(
-                            "compliance_issues",
-                            Integer.class));
+        v.setContractType(
+                rs.getString("contract_type"));
 
-            v.setCriticalDependency(
-                    rs.getObject(
-                            "critical_dependency",
-                            Boolean.class));
+        v.setContractValue(
+                rs.getBigDecimal("contract_value"));
 
-            v.setRiskEvent(rs.getString("risk_event"));
+        v.setCurrency(
+                rs.getString("currency"));
 
-            v.setRiskDate(
-                    rs.getDate("risk_date") != null
-                            ? rs.getDate("risk_date").toLocalDate()
-                            : null);
+        v.setPaymentTermsDays(
+                rs.getObject(
+                        "payment_terms_days",
+                        Integer.class));
 
-            return v;
-        });
+        v.setRenewalNoticeDays(
+                rs.getObject(
+                        "renewal_notice_days",
+                        Integer.class));
+
+        v.setContractStatus(
+                rs.getString("contract_status"));
+
+
+        // ============================================
+        // PERFORMANCE INFORMATION
+        // ============================================
+
+        v.setPerformanceId(
+                rs.getString("performance_id"));
+
+        v.setPeriod(
+                rs.getString("period"));
+
+        v.setOrders(
+                rs.getObject(
+                        "orders",
+                        Integer.class));
+
+        v.setOnTimeDeliveries(
+                rs.getObject(
+                        "on_time_deliveries",
+                        Integer.class));
+
+        v.setLateDeliveries(
+                rs.getObject(
+                        "late_deliveries",
+                        Integer.class));
+
+        v.setQualityScore(
+                rs.getBigDecimal("quality_score"));
+
+        v.setSlaScore(
+                rs.getBigDecimal("sla_score"));
+
+        v.setDeliveryScore(
+                rs.getBigDecimal("delivery_score"));
+
+
+        // ============================================
+        // RISK INFORMATION
+        // ============================================
+
+        v.setRiskId(
+                rs.getString("risk_id"));
+
+        v.setInvoiceCount(
+                rs.getObject(
+                        "invoice_count",
+                        Integer.class));
+
+        v.setInvoiceDiscrepancies(
+                rs.getObject(
+                        "invoice_discrepancies",
+                        Integer.class));
+
+        v.setPaymentDelays(
+                rs.getObject(
+                        "payment_delays",
+                        Integer.class));
+
+        v.setComplianceIssues(
+                rs.getObject(
+                        "compliance_issues",
+                        Integer.class));
+
+        v.setCriticalDependency(
+                rs.getObject(
+                        "critical_dependency",
+                        Boolean.class));
+
+        v.setRiskEvent(
+                rs.getString("risk_event"));
+
+
+        java.sql.Date riskDate =
+                rs.getDate("risk_date");
+
+        v.setRiskDate(
+                riskDate != null
+                        ? riskDate.toLocalDate()
+                        : null
+        );
+
+
+        return v;
     }
 
 
@@ -116,6 +201,7 @@ public class Vendor360Repository {
 
 
     // Total Vendors
+
     public int getTotalVendors() {
 
         String sql = """
@@ -123,16 +209,20 @@ public class Vendor360Repository {
             FROM vw_vendor360
             """;
 
-        Integer result = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class
-        );
+        Integer result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Integer.class
+                );
 
         return result != null ? result : 0;
     }
 
 
-    // Active Contracts
+    // ============================================
+    // ACTIVE CONTRACTS
+    // ============================================
+
     public int getActiveContracts() {
 
         String sql = """
@@ -141,16 +231,20 @@ public class Vendor360Repository {
             WHERE contract_status = 'Active'
             """;
 
-        Integer result = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class
-        );
+        Integer result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Integer.class
+                );
 
         return result != null ? result : 0;
     }
 
 
-    // Critical Dependencies
+    // ============================================
+    // CRITICAL DEPENDENCIES
+    // ============================================
+
     public int getCriticalDependencies() {
 
         String sql = """
@@ -159,16 +253,20 @@ public class Vendor360Repository {
             WHERE critical_dependency = 1
             """;
 
-        Integer result = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class
-        );
+        Integer result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Integer.class
+                );
 
         return result != null ? result : 0;
     }
 
 
-    // High Risk Vendors
+    // ============================================
+    // HIGH RISK VENDORS
+    // ============================================
+
     public int getHighRiskVendors() {
 
         String sql = """
@@ -181,16 +279,20 @@ public class Vendor360Repository {
                 OR critical_dependency = 1
             """;
 
-        Integer result = jdbcTemplate.queryForObject(
-                sql,
-                Integer.class
-        );
+        Integer result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Integer.class
+                );
 
         return result != null ? result : 0;
     }
 
 
-    // Average Quality Score
+    // ============================================
+    // AVERAGE QUALITY SCORE
+    // ============================================
+
     public double getAverageQualityScore() {
 
         String sql = """
@@ -198,16 +300,20 @@ public class Vendor360Repository {
             FROM performance
             """;
 
-        Double result = jdbcTemplate.queryForObject(
-                sql,
-                Double.class
-        );
+        Double result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Double.class
+                );
 
         return result != null ? result : 0.0;
     }
 
 
-    // Average SLA Score
+    // ============================================
+    // AVERAGE SLA SCORE
+    // ============================================
+
     public double getAverageSlaScore() {
 
         String sql = """
@@ -215,16 +321,20 @@ public class Vendor360Repository {
             FROM performance
             """;
 
-        Double result = jdbcTemplate.queryForObject(
-                sql,
-                Double.class
-        );
+        Double result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Double.class
+                );
 
         return result != null ? result : 0.0;
     }
 
 
-    // Average Delivery Score
+    // ============================================
+    // AVERAGE DELIVERY SCORE
+    // ============================================
+
     public double getAverageDeliveryScore() {
 
         String sql = """
@@ -232,10 +342,11 @@ public class Vendor360Repository {
             FROM performance
             """;
 
-        Double result = jdbcTemplate.queryForObject(
-                sql,
-                Double.class
-        );
+        Double result =
+                jdbcTemplate.queryForObject(
+                        sql,
+                        Double.class
+                );
 
         return result != null ? result : 0.0;
     }
