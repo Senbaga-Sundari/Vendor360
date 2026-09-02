@@ -19,6 +19,10 @@ function App() {
   const [vendors, setVendors] = useState([])
   const [dashboard, setDashboard] = useState(null)
   const [error, setError] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('')
+const [selectedCountry, setSelectedCountry] = useState('')
+const [highRiskOnly, setHighRiskOnly] = useState(false)
 
   useEffect(() => {
     fetch('http://localhost:8080/api/vendors')
@@ -87,6 +91,57 @@ const COLORS = [
   '#9c27b0',
   '#00acc1',
   '#795548',
+]
+
+const filteredVendors = vendors.filter((vendor) => {
+
+  const search = searchTerm.toLowerCase()
+
+  const matchesSearch =
+    vendor.vendorId?.toLowerCase().includes(search) ||
+    vendor.vendorName?.toLowerCase().includes(search) ||
+    vendor.category?.toLowerCase().includes(search) ||
+    vendor.country?.toLowerCase().includes(search) ||
+    vendor.city?.toLowerCase().includes(search)
+
+  const matchesCategory =
+    !selectedCategory ||
+    vendor.category === selectedCategory
+
+  const matchesCountry =
+    !selectedCountry ||
+    vendor.country === selectedCountry
+
+  const matchesRisk =
+    !highRiskOnly ||
+    (
+      vendor.riskEvent &&
+      vendor.riskEvent !== 'None' &&
+      vendor.riskEvent !== 'NULL'
+    )
+
+  return (
+    matchesSearch &&
+    matchesCategory &&
+    matchesCountry &&
+    matchesRisk
+  )
+})
+
+const categories = [
+  ...new Set(
+    vendors
+      .map((vendor) => vendor.category)
+      .filter(Boolean)
+  ),
+]
+
+const countries = [
+  ...new Set(
+    vendors
+      .map((vendor) => vendor.country)
+      .filter(Boolean)
+  ),
 ]
 
   return (
@@ -347,9 +402,123 @@ const COLORS = [
 
 
         {/* VENDOR TABLE */}
-        <h2 className="section-title">
-          Vendor Details
-        </h2>
+<div className="vendor-header">
+
+  <h2>Vendor Details</h2>
+
+  <div className="filters">
+
+    {/* SEARCH */}
+
+    <input
+      type="text"
+      placeholder="Search vendors..."
+      value={searchTerm}
+      onChange={(e) =>
+        setSearchTerm(e.target.value)
+      }
+      className="search-box"
+    />
+
+
+    {/* CATEGORY FILTER */}
+
+    <select
+      value={selectedCategory}
+      onChange={(e) =>
+        setSelectedCategory(e.target.value)
+      }
+    >
+
+      <option value="">
+        All Categories
+      </option>
+
+      {categories.map((category) => (
+
+        <option
+          key={category}
+          value={category}
+        >
+          {category}
+        </option>
+
+      ))}
+
+    </select>
+
+
+    {/* COUNTRY FILTER */}
+
+    <select
+      value={selectedCountry}
+      onChange={(e) =>
+        setSelectedCountry(e.target.value)
+      }
+    >
+
+      <option value="">
+        All Countries
+      </option>
+
+      {countries.map((country) => (
+
+        <option
+          key={country}
+          value={country}
+        >
+          {country}
+        </option>
+
+      ))}
+
+    </select>
+
+
+    {/* HIGH RISK FILTER */}
+
+    <label className="risk-filter">
+
+      <input
+        type="checkbox"
+        checked={highRiskOnly}
+        onChange={(e) =>
+          setHighRiskOnly(e.target.checked)
+        }
+      />
+
+      High Risk Only
+
+    </label>
+
+
+    {/* RESET BUTTON */}
+
+    <button
+      className="reset-button"
+      onClick={() => {
+
+        setSearchTerm('')
+        setSelectedCategory('')
+        setSelectedCountry('')
+        setHighRiskOnly(false)
+
+      }}
+    >
+
+      Reset
+
+    </button>
+
+  </div>
+
+</div>
+
+<p className="result-count">
+
+  Showing {filteredVendors.length} of {vendors.length} vendors
+
+</p>
 
         <div className="table-container">
 
@@ -372,7 +541,7 @@ const COLORS = [
 
             <tbody>
 
-              {vendors.map((vendor) => (
+              {filteredVendors.map((vendor) => (
 
                 <tr key={vendor.vendorId}>
 

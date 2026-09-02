@@ -161,3 +161,71 @@ tbody tr:hover {
 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+.vendor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  width: 350px;
+  padding: 12px 15px;
+
+  font-size: 16px;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+
+  outline: none;
+}
+
+.search-box:focus {
+  border-color: #3b5998;
+  box-shadow: 0 0 5px rgba(59, 89, 152, 0.4);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filters select {
+  padding: 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.risk-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.reset-button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  background-color: #3d568c;
+  color: white;
+
+  font-size: 15px;
+}
+
+.reset-button:hover {
+  opacity: 0.9;
+}
+
+.result-count {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #555;
+}
