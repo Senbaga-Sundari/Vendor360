@@ -23,6 +23,9 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('')
 const [selectedCountry, setSelectedCountry] = useState('')
 const [highRiskOnly, setHighRiskOnly] = useState(false)
+const [currentPage, setCurrentPage] = useState(1)
+
+const vendorsPerPage = 10
 
   useEffect(() => {
     fetch('http://localhost:8080/api/vendors')
@@ -143,6 +146,31 @@ const countries = [
       .filter(Boolean)
   ),
 ]
+
+useEffect(() => {
+  setCurrentPage(1)
+}, [
+  searchTerm,
+  selectedCategory,
+  selectedCountry,
+  highRiskOnly,
+])
+
+const totalPages = Math.ceil(
+  filteredVendors.length / vendorsPerPage
+)
+
+const startIndex =
+  (currentPage - 1) * vendorsPerPage
+
+const endIndex =
+  startIndex + vendorsPerPage
+
+const paginatedVendors =
+  filteredVendors.slice(
+    startIndex,
+    endIndex
+  )
 
   return (
     <>
@@ -516,7 +544,24 @@ const countries = [
 
 <p className="result-count">
 
-  Showing {filteredVendors.length} of {vendors.length} vendors
+  Showing{' '}
+
+  {filteredVendors.length === 0
+    ? 0
+    : startIndex + 1}
+
+  {' '}–{' '}
+
+  {Math.min(
+    endIndex,
+    filteredVendors.length
+  )}
+
+  {' '}of{' '}
+
+  {filteredVendors.length}
+
+  {' '}vendors
 
 </p>
 
@@ -541,7 +586,7 @@ const countries = [
 
             <tbody>
 
-              {filteredVendors.map((vendor) => (
+              {paginatedVendors.map((vendor) => (
 
                 <tr key={vendor.vendorId}>
 
@@ -577,6 +622,40 @@ const countries = [
             </tbody>
 
           </table>
+          <div className="pagination">
+
+  <button
+    onClick={() =>
+      setCurrentPage((page) =>
+        Math.max(page - 1, 1)
+      )
+    }
+    disabled={currentPage === 1}
+  >
+    Previous
+  </button>
+
+
+  <span>
+    Page {currentPage} of {totalPages}
+  </span>
+
+
+  <button
+    onClick={() =>
+      setCurrentPage((page) =>
+        Math.min(page + 1, totalPages)
+      )
+    }
+    disabled={
+      currentPage === totalPages ||
+      totalPages === 0
+    }
+  >
+    Next
+  </button>
+
+</div>
 
         </div>
 
@@ -586,3 +665,5 @@ const countries = [
 }
 
 export default App
+
+
