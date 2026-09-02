@@ -1,0 +1,10 @@
+com\vendor360\Vendor360CamelApplication.class
+com\vendor360\routes\ContractsRoute.class
+com\vendor360\routes\PerformanceRoute.class
+com\vendor360\routes\Vendor360Route.class
+com\vendor360\service\Vendor360Service.class
+com\vendor360\controller\Vendor360Controller.class
+com\vendor360\model\DashboardSummary.class
+com\vendor360\model\Vendor360.class
+com\vendor360\routes\RiskRoute.class
+com\vendor360\repository\Vendor360Repository.class
